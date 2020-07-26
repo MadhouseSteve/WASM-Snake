@@ -1,0 +1,27 @@
+[package]
+name = "wasm"
+version = "0.1.0"
+authors = ["Stevan Goode <steve@madhouseminers.com>"]
+edition = "2018"
+description = "Snake in the browser"
+license = "MIT"
+repository = "https://github.com/MadhouseSteve/WASM-Snake"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wasm-bindgen = "0.2.65"
+console_error_panic_hook = "0.1.6"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies.web-sys]
+version = "0.3.4"
+features=[
+  'CanvasRenderingContext2d',
+  'Document',
+  'Element',
+  'HtmlCanvasElement',
+  'Window',
+]
