@@ -31,6 +31,7 @@ pub struct Game {
     canvas: web_sys::CanvasRenderingContext2d,
     position: Position,
     direction: Direction,
+    doTick: bool,
 }
 
 #[wasm_bindgen]
@@ -55,6 +56,7 @@ impl Game {
                 vec![ObjectType::SPACE; (canvas.width() / 5) as usize];
                 (canvas.height() / 5) as usize
             ],
+            doTick: true,
         }
     }
 
@@ -73,6 +75,25 @@ impl Game {
         self.board[self.position.y][self.position.x] = ObjectType::SNAKE_HEAD;
     }
 
+    #[wasm_bindgen]
+    pub fn key_press(self: &mut Game, key: &str) {
+        match key {
+            "ArrowLeft" => self.direction = Direction::LEFT,
+            "ArrowDown" => self.direction = Direction::DOWN,
+            "ArrowRight" => self.direction = Direction::RIGHT,
+            "ArrowUp" => self.direction = Direction::UP,
+            _ => {}
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn tick(self: &mut Game) {
+        if self.doTick == true {
+            self.move_snake();
+            self.render_board();
+        }
+    }
+
     // Fills a row with an object
     fn fill_row(self: &mut Game, row_index: usize, object: ObjectType) {
         for i in 0..self.board[row_index].iter().count() {
@@ -86,9 +107,7 @@ impl Game {
             self.board[i][col_index] = object;
         }
     }
-
-    #[wasm_bindgen]
-    pub fn move_snake(self: &mut Game) {
+    fn move_snake(self: &mut Game) {
         self.board[self.position.y][self.position.x] = ObjectType::SPACE;
         match self.direction {
             Direction::DOWN => self.position.y = self.position.y + 1,
@@ -96,11 +115,19 @@ impl Game {
             Direction::LEFT => self.position.x = self.position.x - 1,
             Direction::RIGHT => self.position.x = self.position.x + 1,
         }
-        self.board[self.position.y][self.position.x] = ObjectType::SNAKE_HEAD;
+
+        match self.board[self.position.y][self.position.x] {
+            ObjectType::SPACE => {
+                self.board[self.position.y][self.position.x] = ObjectType::SNAKE_HEAD
+            }
+            ObjectType::FOOD => {
+                self.board[self.position.y][self.position.x] = ObjectType::SNAKE_HEAD
+            }
+            _ => self.doTick = false,
+        }
     }
 
-    #[wasm_bindgen]
-    pub fn render_board(self: &Game) {
+    fn render_board(self: &Game) {
         self.canvas.clear_rect(
             0.0,
             0.0,
@@ -126,17 +153,6 @@ impl Game {
                     _ => {}
                 }
             }
-        }
-    }
-
-    #[wasm_bindgen]
-    pub fn key_press(self: &mut Game, key: &str) {
-        match key {
-            "ArrowLeft" => self.direction = Direction::LEFT,
-            "ArrowDown" => self.direction = Direction::DOWN,
-            "ArrowRight" => self.direction = Direction::RIGHT,
-            "ArrowUp" => self.direction = Direction::UP,
-            _ => {}
         }
     }
 }

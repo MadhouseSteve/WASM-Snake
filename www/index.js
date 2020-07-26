@@ -4,8 +4,7 @@ let game = new wasm.Game(document.getElementById("board"));
 wasm.Game.set_board(game);
 
 setInterval(() => {
-  wasm.Game.move_snake(game);
-  wasm.Game.render_board(game);
+  wasm.Game.tick(game);
 }, 15);
 
 document.addEventListener("keyup", (event) =>
