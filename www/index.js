@@ -3,10 +3,11 @@ import * as wasm from "../wasm/pkg/wasm";
 let gameLoop;
 let game = new wasm.Game(document.getElementById("board"));
 wasm.Game.set_board(game, false);
-document.addEventListener("keyup", (event) => {
+document.addEventListener("keydown", (event) => {
   if (
     ["ArrowLeft", "ArrowDown", "ArrowRight", "ArrowUp"].indexOf(event.code) > -1
   ) {
+    event.preventDefault();
     if (!gameLoop) playGame();
     wasm.Game.key_press(game, event.code);
   }
