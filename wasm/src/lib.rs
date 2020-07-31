@@ -1,5 +1,7 @@
 extern crate console_error_panic_hook;
+use std::cell::RefCell;
 use std::panic;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -9,17 +11,73 @@ extern "C" {
     fn log(s: &str);
 }
 
+fn window() -> web_sys::Window {
+    web_sys::window().expect("no global `window` exists")
+}
+
+fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    window()
+        .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
+
 #[wasm_bindgen(start)]
 pub fn start() {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
     let mut g = Game::init();
     g.reset();
+
+    // LOOP HERE!
+    let f = Rc::new(RefCell::new(None));
+    let f1 = f.clone();
+
+    *f1.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        g.tick();
+        request_animation_frame(f.borrow().as_ref().unwrap());
+    }) as Box<dyn FnMut()>));
+
+    request_animation_frame(f1.borrow().as_ref().unwrap());
+}
+
+enum Direction {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+}
+
+#[derive(Copy, Clone)]
+struct Position {
+    x: usize,
+    y: usize,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum ObjectType {
+    SPACE,
+    BODY,
+    HEAD,
+    FOOD,
+    WALL,
 }
 
 struct Game {
     score_element: web_sys::HtmlDivElement,
     lives_element: web_sys::HtmlDivElement,
     play_area: web_sys::HtmlCanvasElement,
+
+    height: usize,
+    width: usize,
+    score: usize,
+    lives: usize,
+
+    tick_count: usize,
+
+    snake_position: Position,
+    snake_direction: Direction,
+    snake_body: Vec<Position>,
+
+    grid: Vec<ObjectType>,
 }
 
 impl Game {
@@ -27,7 +85,7 @@ impl Game {
     pub fn init() -> Game {
         let document = web_sys::window().unwrap().document().unwrap();
 
-        Game {
+        let mut g = Game {
             // score
             score_element: document
                 .get_element_by_id("score")
@@ -46,23 +104,188 @@ impl Game {
                 .unwrap()
                 .dyn_into::<web_sys::HtmlCanvasElement>()
                 .unwrap(),
+
+            // size of grid
+            height: 21,
+            width: 11,
+
+            // game tracking
+            lives: 3,
+            score: 0,
+            tick_count: 0,
+            snake_position: Position { x: 0, y: 0 },
+            snake_direction: Direction::DOWN,
+            snake_body: vec![],
+
+            // grid contents
+            grid: vec![],
+        };
+
+        g
+    }
+
+    // Draws the grid on the page
+    fn draw_grid(&self) {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                self.draw_object(y, x, self.grid[(y * self.width) + x]);
+            }
+        }
+        log(&format!("{:?}", self.grid));
+    }
+
+    // Draws an object to the page
+    fn draw_object(&self, row: usize, col: usize, object: ObjectType) {
+        let ctx = self
+            .play_area
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<web_sys::CanvasRenderingContext2d>()
+            .unwrap();
+
+        match object {
+            ObjectType::WALL => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#000000")),
+            ObjectType::SPACE => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#ffffff")),
+            ObjectType::HEAD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#ff0000")),
+            ObjectType::BODY => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#005500")),
+            ObjectType::FOOD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#0000ff")),
+        }
+        ctx.fill_rect(col as f64 * 5.0, row as f64 * 5.0, 4.0, 4.0);
+    }
+
+    fn set_cell(&mut self, row: usize, col: usize, object: ObjectType) {
+        self.grid[row * self.width + col] = object;
+        self.draw_object(row, col, object);
+    }
+
+    // Fill a row with a object type
+    fn fill_row(&mut self, row: usize, object: ObjectType) {
+        let start = self.width * row;
+        let end = self.width * (row + 1);
+        for i in start..end {
+            self.grid[i] = object
+        }
+    }
+
+    // Fill a col with a object type
+    fn fill_col(&mut self, col: usize, object: ObjectType) {
+        let start = 0;
+        let end = self.height;
+        for i in start..end {
+            self.grid[(i * self.width) + col] = object
         }
     }
 
     // Fill in the DOM elements
-    pub fn reset(&self) {
-        self.score_element.set_inner_text("100");
-        self.lives_element.set_inner_text("10");
+    pub fn reset(&mut self) {
+        self.score = 0;
+        self.lives = 3;
+        self.snake_position = Position {
+            x: self.width / 2,
+            y: self.height / 2,
+        };
+        self.snake_direction = Direction::DOWN;
+        self.grid = vec![ObjectType::SPACE; self.height * self.width];
+        self.snake_body = vec![];
+        self.snake_body.push(Position {
+            x: self.snake_position.x,
+            y: self.snake_position.y - 2,
+        });
+        self.snake_body.push(Position {
+            x: self.snake_position.x,
+            y: self.snake_position.y - 1,
+        });
 
-        log(&format!(
-            "{} {}",
-            self.play_area.get_bounding_client_rect().height(),
-            self.play_area.get_bounding_client_rect().width()
-        ));
+        self.set_cell(
+            self.snake_position.y,
+            self.snake_position.x,
+            ObjectType::HEAD,
+        );
+        self.set_cell(
+            self.snake_position.y - 2,
+            self.snake_position.x,
+            ObjectType::BODY,
+        );
+        self.set_cell(
+            self.snake_position.y - 1,
+            self.snake_position.x,
+            ObjectType::BODY,
+        );
+
+        // Add borders to grid
+        self.fill_row(0, ObjectType::WALL);
+        self.fill_row(self.height - 1, ObjectType::WALL);
+        self.fill_col(0, ObjectType::WALL);
+        self.fill_col(self.width - 1, ObjectType::WALL);
+
+        self.tick_count = 0;
+
+        self.draw_grid();
     }
 
     // Handles a tick
-    pub fn tick() {}
+    pub fn tick(&mut self) {
+        self.tick_count = self.tick_count + 1;
+        if self.tick_count % 10 == 0 {
+            // Check snakes destination
+            // If Food ... grow, move, place new food
+            // If Space .. move
+            // If Wall ... die
+            // If Body ... die
+            self.snake_move();
+        }
+
+        self.draw();
+    }
+
+    fn get_square(&self, x: usize, y: usize) {}
+
+    fn snake_grow(&self) {}
+
+    fn snake_move(&mut self) {
+        // Remove the end of the tail
+        self.set_cell(
+            self.snake_body[0].y,
+            self.snake_body[0].x,
+            ObjectType::SPACE,
+        );
+        self.snake_body.remove(0);
+
+        // Add a new square
+        self.set_cell(
+            self.snake_position.y,
+            self.snake_position.x,
+            ObjectType::BODY,
+        );
+        self.snake_body.push(self.snake_position.clone());
+
+        // Move the head
+        match self.snake_direction {
+            Direction::DOWN => self.snake_position.y = self.snake_position.y + 1,
+            Direction::UP => self.snake_position.y = self.snake_position.y - 1,
+            Direction::LEFT => self.snake_position.x = self.snake_position.x - 1,
+            Direction::RIGHT => self.snake_position.x = self.snake_position.x + 1,
+        }
+
+        // Draw the head
+        self.set_cell(
+            self.snake_position.y,
+            self.snake_position.x,
+            ObjectType::HEAD,
+        );
+    }
+
+    fn food_place(&self) {}
+
+    fn snake_die(&self) {}
+
+    fn draw(&self) {
+        self.score_element
+            .set_inner_text(&format!("{}", self.score));
+        self.lives_element
+            .set_inner_text(&format!("{}", self.lives));
+    }
 }
 
 // extern crate console_error_panic_hook;
