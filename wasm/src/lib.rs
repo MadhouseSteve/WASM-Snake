@@ -151,7 +151,7 @@ impl Game {
             ObjectType::BODY => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#005500")),
             ObjectType::FOOD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#0000ff")),
         }
-        ctx.fill_rect(col as f64 * 5.0, row as f64 * 5.0, 4.0, 4.0);
+        ctx.fill_rect(col as f64 * 10.0, row as f64 * 10.0, 8.0, 8.0);
     }
 
     fn set_cell(&mut self, row: usize, col: usize, object: ObjectType) {
