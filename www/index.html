@@ -1,19 +1,43 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Snake Game</title>
-    <style>
-      #board {
-        background-color: #ccc;
-      }
-    </style>
-  </head>
-  <body>
-    <noscript>You need JavaScript enabled to play this game.</noscript>
 
-    <canvas id="board" height="500" width="500"></canvas>
-    <script src="./bootstrap.js"></script>
-    <p>Press any direction to start</p>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <title>Snake Game</title>
+  <style>
+    #layout {
+      height: 100%;
+      width: 100%;
+      display: grid;
+      grid-template: "score lives""board board";
+    }
+
+    #score {
+      grid-area: score;
+    }
+
+    #lives {
+      grid-area: lives;
+    }
+
+    #board {
+      grid-area: board;
+      background-color: #ccc;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>You need JavaScript enabled to play this game.</noscript>
+
+  <div id="layout">
+    <div id="score"></div>
+    <div id="lives"></div>
+
+    <canvas id="board"></canvas>
+  </div>
+  <script src="./index.js"></script>
+</body>
+
 </html>
