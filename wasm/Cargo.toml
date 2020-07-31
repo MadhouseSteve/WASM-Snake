@@ -10,7 +10,7 @@ repository = "https://github.com/MadhouseSteve/WASM-Snake"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wasm-bindgen = "0.2.65"
+wasm-bindgen = "0.2.67"
 console_error_panic_hook = "0.1.6"
 
 [lib]
@@ -22,6 +22,8 @@ features=[
   'CanvasRenderingContext2d',
   'HtmlCanvasElement',
   'HtmlDivElement',
+  'Element',
+  'DomRect',
   'Document',
   'Window',
 ]

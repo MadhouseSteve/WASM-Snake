@@ -51,10 +51,14 @@ impl Game {
 
     // Fill in the DOM elements
     pub fn reset(&self) {
-        self.score_element.set_inner_text("0");
-        self.lives_element.set_inner_text("0");
+        self.score_element.set_inner_text("100");
+        self.lives_element.set_inner_text("10");
 
-        log(&format!("{:?}", self.play_area.height()));
+        log(&format!(
+            "{} {}",
+            self.play_area.get_bounding_client_rect().height(),
+            self.play_area.get_bounding_client_rect().width()
+        ));
     }
 
     // Handles a tick
