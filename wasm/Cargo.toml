@@ -17,14 +17,15 @@ console_error_panic_hook = "0.1.6"
 crate-type = ["cdylib"]
 
 [dependencies.web-sys]
-version = "0.3.4"
+version = "0.3.44"
 features=[
   'CanvasRenderingContext2d',
   'HtmlCanvasElement',
-  'HtmlDivElement',
-  'HtmlSpanElement',
-  'Element',
-  'DomRect',
-  'Document',
-  'Window',
+  'Node'
 ]
+
+[dependencies.node-sys]
+version = "0.4.2"
+
+[dependencies.js-sys]
+version = "0.3.44"
