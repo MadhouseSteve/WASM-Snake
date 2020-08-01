@@ -9,3 +9,4 @@ dev-node:
 
 install:
 	cd www ; npm install
+	cd wasm; cargo install wasm-pack
