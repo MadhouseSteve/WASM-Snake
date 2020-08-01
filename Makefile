@@ -1,4 +1,4 @@
-dev:
+dev: install
 	make -j4 dev-rust dev-node
 
 dev-rust:
@@ -6,3 +6,7 @@ dev-rust:
 
 dev-node:
 	cd www ; npm run dev
+
+install:
+	cd www ; npm install
+	cd wasm; cargo install wasm-pack
