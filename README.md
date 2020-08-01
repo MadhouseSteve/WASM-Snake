@@ -17,6 +17,15 @@ cd wasm
 wasm-pack build
 ```
 
+### Installing web
+
+To install the web dependencies run the following:
+
+```
+cd www
+npm install
+```
+
 ### Building web
 
 To build the web, you will first need to have run the `Building Rust` instructions. Then run:
