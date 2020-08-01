@@ -1,41 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Snake Game</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --red: #f83b3a;
+        --yellow: #ebdf64;
+        --green: #62de6d;
+        --purple: #db55dd;
+        --blue: #5353f1;
+        --cyan: #42e9f4;
+        --black: #000000;
+        --white: #ffffff;
 
-<head>
-  <meta charset="utf-8" />
-  <title>Snake Game</title>
-  <style>
-    /* #layout {
-      height: 100%;
-      width: 100%;
-      display: grid;
-      grid-template: "score lives""board board";
-    }
+        --stats-font-size: 4rem;
+        --max-width-content: 600px;
+      }
 
-    #score {
-      grid-area: score;
-    }
+      @media screen and (min-width: 600px) {
+        :root {
+          --stats-font-size: 2rem;
+        }
+      }
 
-    #lives {
-      grid-area: lives;
-    }
-*/
-    #board {
-      background-color: #ccc;
-    }
-  </style>
-</head>
+      body {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 20px;
+        margin: 0;
+        background-color: var(--black);
+      }
 
-<body>
-  <noscript>You need JavaScript enabled to play this game.</noscript>
+      body > * {
+        box-sizing: border-box;
+      }
 
-  <div id="layout">
-    <div id="score"></div>
-    <div id="lives"></div>
+      #layout {
+        height: 100vh;
+        width: 100vw;
+      }
 
-    <canvas id="board" height="400" width="400"></canvas>
-  </div>
-  <script src="./index.js"></script>
-</body>
+      #board {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
 
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      p {
+        margin: 0;
+      }
+
+      .header {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
+        border: 6px dashed var(--yellow);
+        max-width: var(--max-width-content);
+        padding: 2rem 1rem;
+        margin: 3rem auto;
+      }
+
+      .title {
+        text-transform: uppercase;
+        font-size: 4rem;
+        display: block;
+        text-align: center;
+        color: var(--cyan);
+      }
+
+      .stats {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        max-width: var(--max-width-content);
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .stats_holder {
+        width: 50%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .stats_label {
+        display: inline-block;
+        font-size: var(--stats-font-size);
+        text-transform: uppercase;
+        margin-right: 8px;
+      }
+
+      .stats_label-score {
+        color: var(--purple);
+      }
+
+      .stats_label-lives {
+        color: var(--green);
+      }
+
+      .stats_stat {
+        color: var(--yellow);
+      }
+
+      .stats_score {
+        display: inline-block;
+        font-size: var(--stats-font-size);
+      }
+
+      .stats_lives {
+        display: inline-block;
+        font-size: var(--stats-font-size);
+      }
+
+      .game {
+        text-align: center;
+        padding-top: 8rem;
+      }
+
+      .heartSvgHolder {
+        height: 100%;
+        width: 1.5rem;
+        display: inline-block;
+        margin-right: 1rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>You need JavaScript enabled to play this game.</noscript>
+
+    <main id="layout">
+      <header class="header">
+        <h1 class="title">
+          MadSnake Game
+        </h1>
+      </header>
+
+      <div class="stats">
+        <div class="stats_holder">
+          <span class="stats_label stats_label-score">Score:</span>
+          <span class="stats_score stats_stat" id="score"></span>
+        </div>
+        <div class="stats_holder">
+          <span class="stats_label stats_label-lives">Lives:</span>
+          <span class="stats_lives stats_stat" id="lives"></span>
+        </div>
+      </div>
+
+      <div class="game">
+        <canvas id="board" width="400" height="711"></canvas>
+      </div>
+    </main>
+    <script src="./index.js"></script>
+  </body>
 </html>
