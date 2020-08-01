@@ -62,8 +62,8 @@ enum ObjectType {
 }
 
 struct Game {
-    score_element: web_sys::HtmlDivElement,
-    lives_element: web_sys::HtmlDivElement,
+    score_element: web_sys::HtmlSpanElement,
+    lives_element: web_sys::HtmlSpanElement,
     play_area: web_sys::HtmlCanvasElement,
 
     height: usize,
@@ -90,13 +90,13 @@ impl Game {
             score_element: document
                 .get_element_by_id("score")
                 .unwrap()
-                .dyn_into::<web_sys::HtmlDivElement>()
+                .dyn_into::<web_sys::HtmlSpanElement>()
                 .unwrap(),
             // lives
             lives_element: document
                 .get_element_by_id("lives")
                 .unwrap()
-                .dyn_into::<web_sys::HtmlDivElement>()
+                .dyn_into::<web_sys::HtmlSpanElement>()
                 .unwrap(),
             // play area
             play_area: document
@@ -145,13 +145,13 @@ impl Game {
             .unwrap();
 
         match object {
-            ObjectType::WALL => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#000000")),
-            ObjectType::SPACE => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#ffffff")),
-            ObjectType::HEAD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#ff0000")),
-            ObjectType::BODY => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#005500")),
-            ObjectType::FOOD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#0000ff")),
+            ObjectType::WALL => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#ffffff")),
+            ObjectType::SPACE => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#000000")),
+            ObjectType::HEAD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#62de6d")),
+            ObjectType::BODY => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#62de6d")),
+            ObjectType::FOOD => ctx.set_fill_style(&wasm_bindgen::JsValue::from_str("#db55dd")),
         }
-        ctx.fill_rect(col as f64 * 10.0, row as f64 * 10.0, 8.0, 8.0);
+        ctx.fill_rect(col as f64 * 10.0, row as f64 * 10.0, 10.0, 10.0);
     }
 
     fn set_cell(&mut self, row: usize, col: usize, object: ObjectType) {
